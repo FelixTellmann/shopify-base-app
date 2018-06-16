@@ -1,0 +1,80 @@
+
+
+$color_accent: #36c8ff;
+
+$grid-container: 1440px;
+$grid-columns: 12;
+$grid-breakpoints: (
+        sm: 0,
+        md: 750px,
+        lg: 1010px,
+        xl: 1200px
+);
+
+
+@mixin hover-focus-active() {
+  &:hover,
+  &:focus,
+  &:active {
+    @content
+  }
+}
+
+@mixin hover-focus() {
+  &:hover,
+  &:focus {
+    @content
+  }
+}
+
+@mixin hover() {
+  &:hover {
+    @content
+  }
+}
+
+@mixin visually-hidden() {
+  // sass-lint:disable no-important
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+}
+
+@mixin min-width($size) {
+  @if ($size == 'sm' or $size == 0) {
+    @content;
+  } @else {
+    @media (min-width: map-get($grid-breakpoints, $size)) {
+      @content;
+    }
+  }
+}
+
+@mixin max-width($size) {
+  @if ($size == 'sm' or $size == 0) {
+    @content;
+  } @else {
+    @media (max-width: map-get($grid-breakpoints, $size) - 1) {
+      @content;
+    }
+  }
+}
+
+@mixin min-max-width($min-size, $max-size) {
+  @if ($min-size == 'sm' or $min-size == 0) {
+    @content;
+  } @else {
+    @media (min-width: map-get($grid-breakpoints, $min-size)) and (max-width: map-get($grid-breakpoints, $max-size) - 1) {
+      @content;
+    }
+  }
+}
+
+.test {
+  border: 1px solid red;
+}

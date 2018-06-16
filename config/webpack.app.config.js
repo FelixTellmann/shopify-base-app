@@ -4,18 +4,19 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const contextPath = path.resolve(__dirname, '../app/');
 const buildPath = path.resolve(__dirname, '../build/app/');
-extractStyles = new ExtractTextPlugin({ filename: 'index.css' });
+extractStyles = new ExtractTextPlugin({ filename: 'static/css/index.css' });
 
 module.exports = {
   mode: 'production',
   context: contextPath,
   // Tell webpack to begin building its
   // dependency graph from this file.
-  entry: './index.js',
+  entry: {
+    'static/js/index': './index.js'
+  },
   // And to place the output in the `build` directory
   output: {
-    path: buildPath,
-    filename: 'index.js'
+    path: buildPath
   },
   module: {
     rules: [
@@ -64,9 +65,14 @@ module.exports = {
   plugins: [
     extractStyles,
     new CopyWebpackPlugin([{
+      ignore: [ '*.html' ],
       from: 'static',
       to: 'static'
-    }])
+    }]),
+    new CopyWebpackPlugin([{
+      from: 'static/index.html',
+      to: 'static/..'
+    }]),
   ],
   resolve: {
     extensions: ['.js', '.jsx']

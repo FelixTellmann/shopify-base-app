@@ -63,7 +63,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebPackPlugin({
-      template: 'static/index.html',
+      template: 'static/index_dev.html',
       filename: 'index.html'
     }),
     new Dotenv({
