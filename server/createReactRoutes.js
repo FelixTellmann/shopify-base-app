@@ -2,18 +2,24 @@ import express from 'express';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 
-const createReactRoutes = (app, route, options = {}) => {
-  const { NODE_ENV, root, requireAuth } = options;
+const createReactRoutes = (route, options = {}) => {
+  const { NODE_ENV, root, publicPath, requireAuth } = options;
   const router = express.Router();
   if (NODE_ENV === 'development') {
-    router.use(webpackDevMiddleware(webpack(require(`../config/webpack.${route}.dev.config`))));
+    if (publicPath) {
+      const config = require(`../config/webpack.${route}.dev.config`);
+      config.output.publicPath = publicPath;
+      router.use(webpackDevMiddleware(webpack(config)));
+    } else {
+      router.use(webpackDevMiddleware(webpack(require(`../config/webpack.${route}.dev.config`))));
+    }
   } else {
-    app.use(`/${route}/static`, express.static(`${root}/${route}/static`));
+    router.use(`/static`, express.static(`${root}/${route}/static`));
     router.get('*', (req, res) => {
       res.sendFile(`${root}/${route}/index.html`);
     });
   }
-  app.use(`/${route}`, router);
+  return router;
 };
 
 export default createReactRoutes;

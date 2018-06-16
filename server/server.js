@@ -16,9 +16,8 @@ app.use(function (req, res, next) {
   next();
 });
 
-createReactRoutes(app, 'app', { NODE_ENV, root });
-createReactRoutes(app, 'public', { NODE_ENV, root });
-
+app.use('app', createReactRoutes('app', { NODE_ENV, root }));
+app.use('/', createReactRoutes('public', { NODE_ENV, root, publicPath: '/' }));
 
 /*================ Server Startup ================*/
 app.set('port', (PORT || 3000));
