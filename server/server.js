@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
@@ -46,9 +46,15 @@ passport.deserializeUser((id, done) => {
   }
 });
 
+
+
+
+
+
 app.use('/auth', (req, res, next) => {
   const { shop, hmac, charge } = req.query;
   if (typeof shop !== 'string') {
+    // TODO create a polaris page with a shop input field to get started / select subscription type
     return res.status(400).send(`${url}/auth?shop=liquix-app-development.myshopify.com&charge=free`);
   }
   let state = nonce()();
@@ -57,7 +63,9 @@ app.use('/auth', (req, res, next) => {
   passport.authenticate(`shopify-${state}`, { shop })(req, res, next);
 });
 
-app.use('/callback', (req, res, next) => {
+
+// doesnt work because the above overrides the route
+app.use('/auth/callback', (req, res, next) => {
   passport.authenticate(`shopify-${req.query.state}`)(req, res, next);
 }, (req, res) => {
   passport.unuse(`shopify-${req.query.state}`);
@@ -67,6 +75,7 @@ app.use('/callback', (req, res, next) => {
     return res.redirect(`/app`);
   }
 });
+
 
 
 app.use('/app', /*requireAuth() ,*/ createReactRoutes('app', { NODE_ENV, root, requireAuth: true }));

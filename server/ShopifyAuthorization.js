@@ -10,9 +10,11 @@ class ShopifyAuthorization {
       shop,
       clientID: SHOPIFY_APP_KEY,
       clientSecret: SHOPIFY_APP_SECRET,
-      callbackURL: url + '/callback'
+      callbackURL: url + '/auth/callback'
     }, async (accessToken, refreshToken, params, profile, done) => {
       /*================ Find or Insert Shop ================*/
+      console.log(profile)
+      
       const shop = await Shop.findOneAndUpdate(
         {
           shop: profile.id

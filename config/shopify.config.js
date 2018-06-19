@@ -1,6 +1,6 @@
 const settings = {
   name: 'Liquix Product Manager',
-  url: 'https://bc7cb50a.ngrok.io',
+  url: 'https://5723b622.ngrok.io',
   scopes: {
     read_content: true,
     write_content: true,
