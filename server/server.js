@@ -5,7 +5,8 @@ import passport from 'passport';
 import mongoose from 'mongoose';
 import cookieSession from 'cookie-session';
 import settings from '../config/shopify.config';
-import { createAuth, verifyAuth, redirectAuth } from './ShopifyAuthorization';
+import { createCharge } from './Charge';
+import { createAuth, verifyAuth, unuseAuth } from './Authorization';
 
 
 /*================ Import Models ================*/
@@ -33,11 +34,20 @@ app.use((req, res, next) => {
 
 /*================ Passport User Identification ================*/
 passport.serializeUser((user, done) => done(null, user._id));
-passport.deserializeUser((id, done) => User.findById(id).then((user) => done(null, user)));
+passport.deserializeUser((id, done) => User.findById(id, (err, user) => done(err, user)));
 
 
-app.use('/auth', createAuth, verifyAuth, redirectAuth);
-app.use('/app', /*requireAuth() ,*/ createReactRoutes('app', { NODE_ENV, root, requireAuth: true }));
+app.use('/auth', createAuth, verifyAuth, unuseAuth, (req, res) => {
+  return req.query.state.includes('||')
+    ? res.redirect(`/charge?type=${req.query.state.split('||')[1]}`)
+    : res.redirect(`/app`);
+});
+
+app.use('/charge', /* verifyCharge, */createCharge, /* activateCharge, */(req, res) => {
+  return res.redirect('https://' + req.user.profileURL + '/admin/apps/' + SHOPIFY_APP_KEY);
+});
+
+app.use('/app', /*requireAuth() ,*/ createReactRoutes('app', { NODE_ENV, root, /* --> */requireAuth: true /* Is this needed ?*/ }));
 app.use('/', createReactRoutes('public', { NODE_ENV, root, publicPath: '/' }));
 
 /*================ Server Startup ================*/

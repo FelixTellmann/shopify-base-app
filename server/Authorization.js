@@ -4,10 +4,11 @@ import Shop from './database/shop';
 import nonce from 'nonce';
 import passport from 'passport/lib/index';
 import settings from '../config/shopify.config';
+
 const { NODE_ENV, PORT, SHOPIFY_APP_COOKIE, SHOPIFY_APP_DATABASE, SHOPIFY_APP_KEY, SHOPIFY_APP_SECRET } = process.env;
 const { name, url, scope, auth, charge_options, charges } = settings;
 
-class ShopifyAuthorization {
+class Authorization {
   constructor(shop, state, options = {}) {
     const { url, scope, auth, SHOPIFY_APP_KEY, SHOPIFY_APP_SECRET } = options;
     const ShopifyStrategy = new Strategy({
@@ -20,7 +21,33 @@ class ShopifyAuthorization {
       /*================ Find or Insert Shop ================*/
       // TODO update model to be exact match to data received from shopify
       
-      const shop = await Shop.findOneAndUpdate(
+      
+      /*================ Find, Update or Insert User ================*/
+      const user = await User.findOneAndUpdate(
+        {
+          id: params.associated_user && params.associated_user.id || profile.id
+        },
+        {
+          id: params.associated_user && params.associated_user.id || profile.id,
+          account_owner: params.associated_user && params.associated_user.account_owner || false,
+          locale: params.associated_user && params.associated_user.locale || '',
+          first_name: params.associated_user && params.associated_user.first_name || profile.username,
+          last_name: params.associated_user && params.associated_user.last_name || '',
+          email: params.associated_user && params.associated_user.email || profile.emails[0].value,
+          associated_user_scope: params.associated_user_scope || params.scope,
+          scope: params.scope,
+          access_token: params.access_token,
+          shop_id: profile.id,
+          profileURL: profile.profileURL
+        },
+        {
+          upsert: true,
+          new: true,
+          runValidators: true
+        }
+      );
+      
+      await Shop.findOneAndUpdate(
         {
           id: profile.id
         },
@@ -47,31 +74,6 @@ class ShopifyAuthorization {
         }
       );
       
-      
-      /*================ Find, Update or Insert User ================*/
-      const user = await User.findOneAndUpdate(
-        {
-          id: params.associated_user && params.associated_user.id || profile.id
-        },
-        {
-          id: params.associated_user && params.associated_user.id || profile.id,
-          account_owner: params.associated_user && params.associated_user.account_owner || false,
-          locale: params.associated_user && params.associated_user.locale || '',
-          first_name: params.associated_user && params.associated_user.first_name || profile.username,
-          last_name: params.associated_user && params.associated_user.last_name || '',
-          email: params.associated_user && params.associated_user.email || profile.emails[0].value,
-          associated_user_scope: params.associated_user_scope || params.scope,
-          scope: params.scope,
-          access_token: params.access_token,
-          shop_id: profile.id,
-          profileURL: profile.profileURL
-        },
-        {
-          upsert: true,
-          new: true,
-          runValidators: true
-        });
-      
       /*================ Find Shop & AddToSet User._id ================*/
       await Shop.findOneAndUpdate(
         {
@@ -81,7 +83,8 @@ class ShopifyAuthorization {
           $addToSet: {
             associated_users: user._id
           }
-        });
+        }
+      );
       return done(null, user);
     });
     
@@ -95,7 +98,6 @@ class ShopifyAuthorization {
   };
 }
 
-
 export const createAuth = (req, res, next) => {
   const { shop, charge, hmac, code, timestamp } = req.query;
   if (typeof shop !== 'string') {
@@ -105,25 +107,18 @@ export const createAuth = (req, res, next) => {
   if (!hmac && !code && !timestamp) {
     let state = nonce()();
     charge_options.map((option) => option === charge ? state += `||${charge}` : null);
-    passport.use(`shopify-${state}`, new ShopifyAuthorization(shop, state, { url, scope, auth, SHOPIFY_APP_KEY, SHOPIFY_APP_SECRET }));
+    passport.use(`shopify-${state}`, new Authorization(shop, state, { url, scope, auth, SHOPIFY_APP_KEY, SHOPIFY_APP_SECRET }));
     passport.authenticate(`shopify-${state}`, { shop })(req, res, next);
   } else {
-    next()
+    next();
   }
 };
 
-export const verifyAuth =(req, res, next) => {
+export const verifyAuth = (req, res, next) => {
   passport.authenticate(`shopify-${req.query.state}`)(req, res, next);
+};
+
+export const unuseAuth = (req, res, next) => {
   passport.unuse(`shopify-${req.query.state}`);
   next();
 };
-
-export const redirectAuth =(req, res) => {
-  if (req.query.state.includes('||')) {
-    return res.redirect(`/charge?type=${req.query.state.split('||')[1]}`);
-  } else {
-    return res.redirect(`/app`);
-  }
-};
-
-export default ShopifyAuthorization;

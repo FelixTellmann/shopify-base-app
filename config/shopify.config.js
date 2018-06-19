@@ -1,6 +1,6 @@
 const settings = {
   name: 'Liquix Product Manager',
-  url: 'https://97fbba44.ngrok.io',
+  url: 'https://5ddd13fb.ngrok.io',
   scopes: {
     read_content: true,
     write_content: true,
@@ -45,18 +45,20 @@ const settings = {
     free: {
       name: 'Liquix Product Manager - Free Developer Module',
       test: true,
-      type: 'application_charges',
+      type: 'application_charge',
       price: 123.02,
-      cap: 123.12,
+      capped_amount: 123.12,
       terms: 'Terms & Conditions apply. THis is the good thing here!',
-      trial: 12
+      trial_days: 12
     },
     pro: {
       name: 'Liquix Product Manager - Free Developer Module',
       test: true,
-      type: 'recurring_application_charges',
+      type: 'recurring_application_charge',
       price: 12.02,
-      cap: 300.12,
+      capped_amount: 300.12,
+      terms: 'Terms & Conditions apply. THis is the good thing here!',
+      trial_days: 12,
       usage_charge_options: ['test', 'overuse'],
       usage_charges: {
         test: {
@@ -67,45 +69,43 @@ const settings = {
           price: 4.00,
           description: 'this is a usage charge'
         }
-      },
-      terms: 'Terms & Conditions apply. THis is the good thing here!',
-      trial: 12
+      }
     },
     advanced: {
       name: 'Liquix Product Manager - Free Developer Module',
       test: true,
-      type: 'recurring_application_charges',
+      type: 'recurring_application_charge',
       price: 5.02,
-      cap: 33.12,
+      capped_amount: 33.12,
       terms: 'Terms & Conditions apply. THis is the good thing here!',
-      trial: 12
+      trial_days: 12
     },
     enterprise: {
       name: 'Liquix Product Manager - Free Developer Module',
       test: true,
-      type: 'recurring_application_charges',
+      type: 'recurring_application_charge',
       price: 78.02,
-      cap: 222.12,
+      capped_amount: 222.12,
       terms: 'Terms & Conditions apply. THis is the good thing here!',
-      trial: 12
+      trial_days: 12
     },
     test: {
       name: 'Liquix Product Manager - Free Developer Module',
       test: true,
-      type: 'recurring_application_charges',
+      type: 'recurring_application_charge',
       price: 12.02,
-      cap: 5443.12,
+      capped_amount: 5443.12,
       terms: 'Terms & Conditions apply. THis is the good thing here!',
-      trial: 12
+      trial_days: 12
     },
     credit: {
       name: 'Liquix Product Manager - Free Developer Module',
       test: true,
-      type: 'application_credits',
+      type: 'application_credit',
       price: 12.02,
-      cap: 5443.12,
+      capped_amount: 5443.12,
       terms: 'Terms & Conditions apply. THis is the good thing here!',
-      trial: 12
+      trial_days: 12
     }
   }
 };

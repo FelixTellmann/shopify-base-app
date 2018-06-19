@@ -2,9 +2,11 @@ import mongoose, { Schema } from 'mongoose';
 
 const chargeSchema = new Schema({
   id: Number,
-  method: String,
   type: String,
-  data: {}
+  application_charge: {},
+  recurring_application_charge: {},
+  application_credit: {},
+  usage_charge: {}
 });
 
 const Charge = mongoose.model('charge', chargeSchema);
