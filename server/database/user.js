@@ -1,13 +1,17 @@
-import mongoose, {Schema} from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 const userSchema = new Schema({
-    id: Number,
-    shop_URL: String,
-    first_name: String,
-    last_name: String,
-    email: String,
-    associated_scope: String,
-    access_token: String,
+  id: Number,
+  shop_id: Number,
+  profileURL: String,
+  account_owner: Boolean,
+  email: String,
+  first_name: String,
+  last_name: String,
+  locale: String,
+  associated_user_scope: String,
+  scope: String,
+  access_token: String
 });
 
 const User = mongoose.model('user', userSchema);

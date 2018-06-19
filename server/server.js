@@ -1,17 +1,15 @@
 import express from 'express';
 import path from 'path';
 import createReactRoutes from './createReactRoutes';
-import nonce from 'nonce';
 import passport from 'passport';
 import mongoose from 'mongoose';
 import cookieSession from 'cookie-session';
 import settings from '../config/shopify.config';
-import ShopifyAuthorization from './ShopifyAuthorization';
+import { createAuth, verifyAuth, redirectAuth } from './ShopifyAuthorization';
 
 
 /*================ Import Models ================*/
 import User from './database/user';
-import Shop from './database/shop';
 
 
 const root = path.resolve(__dirname, '../');
@@ -34,50 +32,11 @@ app.use((req, res, next) => {
 });
 
 /*================ Passport User Identification ================*/
-passport.serializeUser((user, done) => {
-  done(null, user._id);
-});
-
-passport.deserializeUser((id, done) => {
-  if (auth === 'per-user') { // If Online access_token is required based on user Scope Levels
-    User.findById(id).then((user) => done(null, user));
-  } else { // If Offline access_token is required based app requested Scope
-    Shop.findById(id).then((user) => done(null, user));
-  }
-});
+passport.serializeUser((user, done) => done(null, user._id));
+passport.deserializeUser((id, done) => User.findById(id).then((user) => done(null, user)));
 
 
-
-
-
-
-app.use('/auth', (req, res, next) => {
-  const { shop, hmac, charge } = req.query;
-  if (typeof shop !== 'string') {
-    // TODO create a polaris page with a shop input field to get started / select subscription type
-    return res.status(400).send(`${url}/auth?shop=liquix-app-development.myshopify.com&charge=free`);
-  }
-  let state = nonce()();
-  charge_options.map((option) => option === charge ? state += `||${charge}` : null);
-  passport.use(`shopify-${state}`, new ShopifyAuthorization(shop, state, { url, scope, auth, SHOPIFY_APP_KEY, SHOPIFY_APP_SECRET }));
-  passport.authenticate(`shopify-${state}`, { shop })(req, res, next);
-});
-
-
-// doesnt work because the above overrides the route
-app.use('/auth/callback', (req, res, next) => {
-  passport.authenticate(`shopify-${req.query.state}`)(req, res, next);
-}, (req, res) => {
-  passport.unuse(`shopify-${req.query.state}`);
-  if (req.query.state.includes('||')) {
-    return res.redirect(`/charge?type=${req.query.state.split('||')[1]}`);
-  } else {
-    return res.redirect(`/app`);
-  }
-});
-
-
-
+app.use('/auth', createAuth, verifyAuth, redirectAuth);
 app.use('/app', /*requireAuth() ,*/ createReactRoutes('app', { NODE_ENV, root, requireAuth: true }));
 app.use('/', createReactRoutes('public', { NODE_ENV, root, publicPath: '/' }));
 

@@ -70,8 +70,8 @@
     "clean": "rimraf build && mkdir build",
     "start": "cross-env NODE_ENV=production node -r dotenv/config -r ./build/server/server.js",
     "start:local": "cross-env NODE_ENV=development nodemon -r dotenv/config -r babel-register ./server/server.js",
-    "start:local:ngrok": "ngrok http 3000",
     "start:local:app": "webpack-dev-server --config ./config/webpack.app.dev.config.js --content-base app/ --inline --hot --port 3001",
-    "start:local:public": "webpack-dev-server --config ./config/webpack.public.dev.config.js --content-base public/ --inline --hot --port 3002"
+    "start:local:public": "webpack-dev-server --config ./config/webpack.public.dev.config.js --content-base public/ --inline --hot --port 3002",
+    "ngrok": "ngrok http 3000"
   }
 }
